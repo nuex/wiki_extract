@@ -10,6 +10,7 @@ module WikiExtract
     html = all_pages(site)
     links = links_from_html(html)
     extract_and_convert_pages(site, links)
+    copy_index
   end
 
   private
@@ -56,7 +57,11 @@ module WikiExtract
   end
 
   def self.rewrite_link(link)
-    "#{link['href'].gsub(/\/wiki/, '').downcase}.html"
+    newlink = link['href']
+    newlink.gsub!(/\/wiki/, '')
+    newlink.gsub!(' ', '_')
+    newlink.gsub!('/', '-')
+    "#{newlink.downcase}.html"
   end
 
   def self.remove_comments(doc)
@@ -73,7 +78,9 @@ module WikiExtract
   end
 
   def self.filename(heading)
-    "#{heading.gsub(/ /, '_').downcase}.md"
+    name = heading.gsub(' ', '_')
+    name = name.gsub('/', '-')
+    "#{name.downcase}.md"
   end
 
   def self.build_page(title, first_heading, content)
@@ -82,10 +89,8 @@ module WikiExtract
     page << "layout: default\n"
     page << "title: #{title}\n"
     page << "---\n\n"
-    page << "<div id=\"page\">\n\n"
     page << "# #{first_heading}\n\n"
     page << markdown(content)
-    page << "\n\n</div>"
     page
   end
 
@@ -104,6 +109,10 @@ module WikiExtract
 
   def self.html_doc(html)
     Nokogiri::HTML(html)
+  end
+
+  def self.copy_index
+    File.open('index.md', 'w') {|f| f.write(File.read("main_page.md")) }
   end
 end
 
