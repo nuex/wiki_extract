@@ -56,7 +56,11 @@ module WikiExtract
   end
 
   def self.rewrite_link(link)
-    "#{link['href'].gsub(/\/wiki/, '').downcase}.html"
+    newlink = link['href']
+    newlink.gsub!(/\/wiki/, '')
+    newlink.gsub!(' ', '_')
+    newlink.gsub!('/', '-')
+    "#{newlink.downcase}.html"
   end
 
   def self.remove_comments(doc)
@@ -73,7 +77,9 @@ module WikiExtract
   end
 
   def self.filename(heading)
-    "#{heading.gsub(/ /, '_').downcase}.md"
+    name = heading.gsub(' ', '_')
+    name = name.gsub('/', '-')
+    "#{name.downcase}.md"
   end
 
   def self.build_page(title, first_heading, content)
